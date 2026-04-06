@@ -122,7 +122,14 @@
             if(_0xdb){ _0xrc(_0xdb); _0xus("Refreshing..."); }
             setTimeout(() => {
                 _0xsb();
-                if(_0xok()){ _0xus("Success"); _0xcp(); _0xst(); _0xrun = ![]; return; }
+                if(_0xok()){ 
+                    _0xus("Success"); 
+                    _0xcp(); 
+                    _0xst(); 
+                    _0xrun = ![]; 
+                    if(_0xp) _0xp.remove(); // This line hides the toolbox on success
+                    return; 
+                }
                 if(_0xfail()){ _0xus("Retry..."); _0xcp(); }
                 setTimeout(_0xloop, 250);
             }, 120);
