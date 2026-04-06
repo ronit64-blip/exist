@@ -128,12 +128,11 @@
             }, 120);
         }
 
-        // --- NEW TOOLBOX UI (GREY & BLACK) ---
         _0xp = document.createElement("div");
         _0xp.style = "position:fixed;top:100px;right:20px;background:#f0f0f0;color:#000;padding:12px;border-radius:12px;z-index:999999;width:200px;box-shadow:0 4px 15px rgba(0,0,0,0.2);font-family:sans-serif;border:1px solid #ccc;user-select:none;";
         _0xp.innerHTML = `
             <div id="dragHandle" style="margin-bottom:10px;cursor:move;font-weight:bold;font-size:14px;display:flex;align-items:center;color:#333;">
-                <span style="margin-right:5px;">🔘</span> Drag Me
+                <span style="margin-right:5px;">🔘</span> Redx
             </div>
             <input id="amt" type="number" value="1000" style="width:100%;margin-bottom:8px;padding:8px;background:#fff;color:#000;border:1px solid #bbb;border-radius:6px;text-align:center;font-size:16px;box-sizing:border-box;"/>
             <div id="status" style="margin-bottom:10px;font-size:12px;color:#666;text-align:center;font-weight:bold;">Idle</div>
@@ -144,7 +143,6 @@
         `;
         document.body.appendChild(_0xp);
 
-        // --- SMOOTH DRAGGING LOGIC ---
         (function(){
             let isDragging = false;
             let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
