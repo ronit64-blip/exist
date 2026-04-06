@@ -1,5 +1,6 @@
 {
   "allowedUIDs": [
-    "UID1001"
+    "user1",
+    "user2"
   ]
 }
