@@ -6,7 +6,7 @@
         let isRunning = false;
         let alarmInterval = null;
 
-        // UI Panel - Small Slide Rectangular Design
+        // UI Panel - AlienX Slide Design
         const panel = document.createElement("div");
         panel.id = "alien-panel";
         panel.style = `
@@ -99,30 +99,33 @@
         async function performCycle() {
             if (!isRunning) return;
 
+            const currentTarget = String(targetInput.value).trim();
             const refreshBtn = Array.from(document.querySelectorAll("div, button, span")).find(el => el.innerText.trim() === "Default");
-            if (refreshBtn) refreshBtn.click();
             
-            statusLabel.innerText = "Searching...";
+            if (refreshBtn) refreshBtn.click();
+            statusLabel.innerText = "Searching " + currentTarget;
 
             setTimeout(() => {
-                const target = targetInput.value;
                 const divs = document.querySelectorAll("div");
                 let found = false;
 
                 for (let el of divs) {
-                    if (el.innerText.includes("₹") && el.innerText.includes(target)) {
+                    const cellText = el.innerText || "";
+                    if (cellText.includes("₹") && cellText.includes(currentTarget)) {
                         const buyBtn = Array.from(el.querySelectorAll("button")).find(b => /buy/i.test(b.innerText));
                         if (buyBtn) {
                             found = true;
                             buyBtn.click();
                             
                             setTimeout(() => {
+                                // SUCCESS CHECK: Remove panel if bought
                                 if (document.body.innerText.toLowerCase().includes("success")) {
-                                    statusLabel.innerText = "Success ✅";
                                     isRunning = false;
                                     playAlarm();
+                                    panel.remove(); // Removes the toolbox entirely
+                                    window.autoBuyerLoaded = false; // Allows reload if needed later
                                 } else {
-                                    statusLabel.innerText = "Page Changed 🔔";
+                                    // If not success, resume searching instead of showing "Page Changed"
                                     performCycle();
                                 }
                             }, 450);
