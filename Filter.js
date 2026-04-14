@@ -6,36 +6,36 @@
         let isRunning = false;
         let alarmInterval = null;
 
-        // Create the UI Panel - Sleek Rectangular "Slide" Design
+        // Small, Rectangular "Slide" Panel
         const panel = document.createElement("div");
         panel.id = "alien-panel";
         panel.style = `
             position: fixed;
-            bottom: 30px;
-            right: 30px;
+            bottom: 20px;
+            right: 20px;
             background: #d1d1d1; 
             color: #000;
-            padding: 8px 15px;
-            border-radius: 8px;
+            padding: 5px 12px;
+            border-radius: 6px;
             z-index: 1000000;
             display: flex;
             align-items: center;
-            gap: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            gap: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             font-family: sans-serif;
-            border: 1px solid #777;
+            border: 1px solid #888;
             user-select: none;
             touch-action: none;
             cursor: move;
+            height: 35px;
         `;
         
         panel.innerHTML = `
-            <div style="font-weight: 900; font-size: 14px; letter-spacing: 1px;">ALIEN</div>
-            <div style="height: 20px; width: 1px; background: #999;"></div>
-            <input id="targetAmt" type="number" value="1000" style="width: 70px; padding: 4px; background: #fff; color: #000; border: 1px solid #777; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; cursor: text;"/>
-            <div id="statusText" style="font-size: 11px; font-weight: bold; min-width: 80px;">Status: <span id="statusSpan" style="color:#555;">IDLE</span></div>
-            <button id="startBtn" style="background: #2e7d32; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px;">START</button>
-            <button id="stopBtn" style="background: #c62828; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px;">STOP</button>
+            <div style="font-weight: 900; font-size: 12px; letter-spacing: 1px;">ALIEN</div>
+            <input id="targetAmt" type="number" value="1000" style="width: 60px; height: 22px; padding: 0 4px; background: #fff; color: #000; border: 1px solid #777; border-radius: 3px; text-align: center; font-size: 13px; font-weight: bold; cursor: text;"/>
+            <div id="statusText" style="font-size: 10px; font-weight: bold; min-width: 70px; white-space: nowrap;">Status: <span id="statusSpan" style="color:#555;">IDLE</span></div>
+            <button id="startBtn" style="background: #2e7d32; color: #fff; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-weight: bold; font-size: 10px;">START</button>
+            <button id="stopBtn" style="background: #c62828; color: #fff; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-weight: bold; font-size: 10px;">STOP</button>
         `;
         document.body.appendChild(panel);
 
@@ -46,20 +46,17 @@
         let isDragging = false;
         let offset = { x: 0, y: 0 };
 
-        const start = (e) => {
-            // Prevent dragging if clicking the input field or buttons
+        const startDrag = (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-            
             isDragging = true;
             const cx = e.clientX || e.touches[0].clientX;
             const cy = e.clientY || e.touches[0].clientY;
             offset.x = cx - panel.getBoundingClientRect().left;
             offset.y = cy - panel.getBoundingClientRect().top;
-            
-            document.addEventListener(e.type === 'mousedown' ? 'mousemove' : 'touchmove', move);
+            document.addEventListener(e.type === 'mousedown' ? 'mousemove' : 'touchmove', moveDrag);
         };
 
-        const move = (e) => {
+        const moveDrag = (e) => {
             if (!isDragging) return;
             const x = (e.clientX || e.touches[0].clientX) - offset.x;
             const y = (e.clientY || e.touches[0].clientY) - offset.y;
@@ -69,16 +66,16 @@
             panel.style.bottom = 'auto';
         };
 
-        const stop = () => {
+        const stopDrag = () => {
             isDragging = false;
-            document.removeEventListener('mousemove', move);
-            document.removeEventListener('touchmove', move);
+            document.removeEventListener('mousemove', moveDrag);
+            document.removeEventListener('touchmove', moveDrag);
         };
 
-        panel.addEventListener('mousedown', start);
-        panel.addEventListener('touchstart', start);
-        document.addEventListener('mouseup', stop);
-        document.addEventListener('touchend', stop);
+        panel.addEventListener('mousedown', startDrag);
+        panel.addEventListener('touchstart', startDrag);
+        document.addEventListener('mouseup', stopDrag);
+        document.addEventListener('touchend', stopDrag);
 
         // --- Core Auto-Buy Logic ---
         function playAlarm() {
@@ -101,46 +98,43 @@
             setTimeout(() => {
                 const target = targetInput.value;
                 const divs = document.querySelectorAll("div");
-                let foundAnyMatch = false;
+                let foundMatch = false;
 
                 for (let el of divs) {
                     if (el.innerText.includes("₹") && el.innerText.includes(target)) {
                         const buyBtn = Array.from(el.querySelectorAll("button")).find(b => /buy/i.test(b.innerText));
                         if (buyBtn) {
-                            foundAnyMatch = true;
+                            foundMatch = true;
                             buyBtn.click();
                             
                             setTimeout(() => {
-                                const bodyText = document.body.innerText.toLowerCase();
-                                if (bodyText.includes("success") || bodyText.includes("processing")) {
-                                    statusLabel.innerText = "BOUGHT! ✅";
+                                if (document.body.innerText.toLowerCase().includes("success") || document.body.innerText.toLowerCase().includes("processing")) {
+                                    statusLabel.innerText = "DONE! ✅";
                                     isRunning = false;
                                     playAlarm();
                                 } else {
-                                    statusLabel.innerText = "RETRYING...";
+                                    statusLabel.innerText = "MISSED!";
                                     performCycle();
                                 }
-                            }, 400);
+                            }, 450);
                             return; 
                         }
                     }
                 }
 
-                if (isRunning && !foundAnyMatch) {
-                    setTimeout(performCycle, 350); 
-                }
+                if (isRunning && !foundMatch) setTimeout(performCycle, 350); 
             }, 250); 
         }
 
         document.getElementById("startBtn").onclick = (e) => {
-            e.stopPropagation(); // Stop drag event
+            e.stopPropagation();
             if (isRunning) return;
             isRunning = true;
             performCycle();
         };
 
         document.getElementById("stopBtn").onclick = (e) => {
-            e.stopPropagation(); // Stop drag event
+            e.stopPropagation();
             isRunning = false;
             clearInterval(alarmInterval);
             alarmInterval = null;
