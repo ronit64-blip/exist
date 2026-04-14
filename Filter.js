@@ -6,40 +6,44 @@
         let isRunning = false;
         let alarmInterval = null;
 
-        // Compact Rectangular Tile
+        // UI Panel - Matching the provided image (Light Gray Tile)
         const panel = document.createElement("div");
         panel.id = "alien-panel";
         panel.style = `
             position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background: #d1d1d1; 
+            bottom: 30px;
+            right: 30px;
+            background: #f0f0f0; 
             color: #000;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 20px;
             z-index: 1000000;
+            width: 260px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            font-family: sans-serif;
-            border: 1px solid #777;
             user-select: none;
             touch-action: none;
             cursor: move;
-            width: 140px; /* Reduced length */
         `;
         
         panel.innerHTML = `
-            <div style="font-weight: 900; font-size: 13px; letter-spacing: 2px;">ALIEN</div>
-            <input id="targetAmt" type="number" value="1000" style="width: 90%; height: 26px; background: #fff; color: #000; border: 1px solid #666; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; cursor: text;"/>
-            <div id="statusText" style="font-size: 10px; font-weight: bold; text-align: center;">
-                STATUS: <span id="statusSpan" style="color:#555;">IDLE</span>
+            <div style="display: flex; align-items: center; gap: 8px; align-self: flex-start; margin-bottom: 15px;">
+                <div style="width: 18px; height: 18px; border: 3px solid #777; border-radius: 50%; background: #999;"></div>
+                <span style="font-weight: 700; font-size: 18px;">Redx</span>
             </div>
-            <div style="display: flex; gap: 6px; width: 100%;">
-                <button id="startBtn" style="flex: 1; background: #2e7d32; color: #fff; border: none; padding: 6px 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 10px;">START</button>
-                <button id="stopBtn" style="flex: 1; background: #c62828; color: #fff; border: none; padding: 6px 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 10px;">STOP</button>
+            
+            <input id="targetAmt" type="number" value="1000" style="width: 100%; height: 50px; background: #fff; color: #000; border: 1px solid #ccc; border-radius: 12px; text-align: center; font-size: 24px; font-weight: 500; margin-bottom: 15px; outline: none; cursor: text;"/>
+            
+            <div id="statusText" style="margin-bottom: 15px; font-size: 16px; font-weight: 500; color: #555;">
+                <span id="statusSpan">Idle</span>
+            </div>
+            
+            <div style="display: flex; gap: 12px; width: 100%;">
+                <button id="startBtn" style="flex: 1; background: #28a745; color: #fff; border: none; padding: 12px 0; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 16px;">Start</button>
+                <button id="stopBtn" style="flex: 1; background: #dc3545; color: #fff; border: none; padding: 12px 0; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 16px;">Stop</button>
             </div>
         `;
         document.body.appendChild(panel);
@@ -47,7 +51,7 @@
         const statusLabel = document.getElementById("statusSpan");
         const targetInput = document.getElementById("targetAmt");
 
-        // --- Drag Anywhere Logic ---
+        // --- Smooth Draggable Logic (Anywhere on panel) ---
         let isDragging = false;
         let offset = { x: 0, y: 0 };
 
@@ -97,8 +101,7 @@
             const refreshBtn = Array.from(document.querySelectorAll("div, button, span")).find(el => el.innerText.trim() === "Default");
             if (refreshBtn) refreshBtn.click();
             
-            statusLabel.innerText = "RUNNING";
-            statusLabel.style.color = "#2e7d32";
+            statusLabel.innerText = "Refreshing...";
 
             setTimeout(() => {
                 const target = targetInput.value;
@@ -114,11 +117,11 @@
                             
                             setTimeout(() => {
                                 if (document.body.innerText.toLowerCase().includes("success") || document.body.innerText.toLowerCase().includes("processing")) {
-                                    statusLabel.innerText = "DONE! ✅";
+                                    statusLabel.innerText = "Success ✅";
                                     isRunning = false;
                                     playAlarm();
                                 } else {
-                                    statusLabel.innerText = "RETRYING";
+                                    statusLabel.innerText = "Page Changed 🔔";
                                     performCycle();
                                 }
                             }, 450);
@@ -142,8 +145,7 @@
             isRunning = false;
             clearInterval(alarmInterval);
             alarmInterval = null;
-            statusLabel.innerText = "IDLE";
-            statusLabel.style.color = "#555";
+            statusLabel.innerText = "Stopped";
         };
 
         targetInput.onclick = (e) => e.stopPropagation();
