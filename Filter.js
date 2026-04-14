@@ -133,7 +133,8 @@
                         }
                     }
                 }
-                if (isRunning && !found) setTimeout(performCycle, 350); 
+                if (isRunning && !found)
+ setTimeout(performCycle, 350); 
             }, 250); 
         }
 
