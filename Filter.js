@@ -6,28 +6,58 @@
         let isRunning = false;
         let alarmInterval = null;
 
+        // Create the UI Panel - Sleek Rectangular "Slide" Design
         const panel = document.createElement("div");
         panel.id = "alien-panel";
-        panel.style = `position:fixed;bottom:30px;right:30px;background:#d1d1d1;color:#000;padding:15px;border-radius:10px;z-index:1000000;width:200px;box-shadow:0 4px 15px rgba(0,0,0,0.3);font-family:sans-serif;border:2px solid #555;user-select:none;touch-action:none;`;
+        panel.style = `
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #d1d1d1; 
+            color: #000;
+            padding: 8px 15px;
+            border-radius: 8px;
+            z-index: 1000000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            font-family: sans-serif;
+            border: 1px solid #777;
+            user-select: none;
+            touch-action: none;
+            cursor: move;
+        `;
         
         panel.innerHTML = `
-            <div id="dragHandle" style="cursor:move;font-weight:800;font-size:16px;margin-bottom:12px;border-bottom:1px solid #999;padding-bottom:5px;text-align:center;letter-spacing:2px;">ALIEN</div>
-            <div style="font-size:11px;font-weight:bold;margin-bottom:4px;">TARGET PRICE (₹)</div>
-            <input id="targetAmt" type="number" value="1000" style="width:88%;margin-bottom:12px;padding:8px;background:#fff;color:#000;border:1px solid #777;border-radius:5px;text-align:center;font-size:16px;font-weight:bold;"/>
-            <div id="statusText" style="margin-bottom:12px;font-size:12px;font-weight:bold;">Status: <span id="statusSpan" style="color:#555;">IDLE</span></div>
-            <div style="display:flex;justify-content:space-between;">
-                <button id="startBtn" style="width:48%;background:#2e7d32;color:#fff;border:none;padding:8px;border-radius:5px;cursor:pointer;font-weight:bold;">START</button>
-                <button id="stopBtn" style="width:48%;background:#c62828;color:#fff;border:none;padding:8px;border-radius:5px;cursor:pointer;font-weight:bold;">STOP</button>
-            </div>
+            <div style="font-weight: 900; font-size: 14px; letter-spacing: 1px;">ALIEN</div>
+            <div style="height: 20px; width: 1px; background: #999;"></div>
+            <input id="targetAmt" type="number" value="1000" style="width: 70px; padding: 4px; background: #fff; color: #000; border: 1px solid #777; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; cursor: text;"/>
+            <div id="statusText" style="font-size: 11px; font-weight: bold; min-width: 80px;">Status: <span id="statusSpan" style="color:#555;">IDLE</span></div>
+            <button id="startBtn" style="background: #2e7d32; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px;">START</button>
+            <button id="stopBtn" style="background: #c62828; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px;">STOP</button>
         `;
         document.body.appendChild(panel);
 
         const statusLabel = document.getElementById("statusSpan");
+        const targetInput = document.getElementById("targetAmt");
 
-        // --- Smooth Draggable Logic ---
+        // --- Drag Anywhere Logic ---
         let isDragging = false;
         let offset = { x: 0, y: 0 };
-        const handle = document.getElementById("dragHandle");
+
+        const start = (e) => {
+            // Prevent dragging if clicking the input field or buttons
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+            
+            isDragging = true;
+            const cx = e.clientX || e.touches[0].clientX;
+            const cy = e.clientY || e.touches[0].clientY;
+            offset.x = cx - panel.getBoundingClientRect().left;
+            offset.y = cy - panel.getBoundingClientRect().top;
+            
+            document.addEventListener(e.type === 'mousedown' ? 'mousemove' : 'touchmove', move);
+        };
 
         const move = (e) => {
             if (!isDragging) return;
@@ -39,23 +69,14 @@
             panel.style.bottom = 'auto';
         };
 
-        const start = (e) => {
-            isDragging = true;
-            const cx = e.clientX || e.touches[0].clientX;
-            const cy = e.clientY || e.touches[0].clientY;
-            offset.x = cx - panel.getBoundingClientRect().left;
-            offset.y = cy - panel.getBoundingClientRect().top;
-            document.addEventListener(e.type === 'mousedown' ? 'mousemove' : 'touchmove', move);
-        };
-
         const stop = () => {
             isDragging = false;
             document.removeEventListener('mousemove', move);
             document.removeEventListener('touchmove', move);
         };
 
-        handle.addEventListener('mousedown', start);
-        handle.addEventListener('touchstart', start);
+        panel.addEventListener('mousedown', start);
+        panel.addEventListener('touchstart', start);
         document.addEventListener('mouseup', stop);
         document.addEventListener('touchend', stop);
 
@@ -71,16 +92,14 @@
         async function performCycle() {
             if (!isRunning) return;
 
-            // 1. Refresh attempt
             const refreshBtn = Array.from(document.querySelectorAll("div, button, span")).find(el => el.innerText.trim() === "Default");
             if (refreshBtn) refreshBtn.click();
             
-            statusLabel.innerText = "SEARCHING...";
+            statusLabel.innerText = "RUNNING";
             statusLabel.style.color = "#2e7d32";
 
-            // 2. Search logic with "Item Gone" safety
             setTimeout(() => {
-                const target = document.getElementById("targetAmt").value;
+                const target = targetInput.value;
                 const divs = document.querySelectorAll("div");
                 let foundAnyMatch = false;
 
@@ -91,43 +110,45 @@
                             foundAnyMatch = true;
                             buyBtn.click();
                             
-                            // Check after clicking: did we actually succeed?
                             setTimeout(() => {
-                                if (document.body.innerText.toLowerCase().includes("success") || document.body.innerText.toLowerCase().includes("processing")) {
+                                const bodyText = document.body.innerText.toLowerCase();
+                                if (bodyText.includes("success") || bodyText.includes("processing")) {
                                     statusLabel.innerText = "BOUGHT! ✅";
                                     isRunning = false;
                                     playAlarm();
                                 } else {
-                                    // Item was likely taken by someone else, resume searching
-                                    statusLabel.innerText = "MISSED! RETRYING...";
+                                    statusLabel.innerText = "RETRYING...";
                                     performCycle();
                                 }
-                            }, 500);
+                            }, 400);
                             return; 
                         }
                     }
                 }
 
-                // 3. If no match was found at all, keep looping
                 if (isRunning && !foundAnyMatch) {
                     setTimeout(performCycle, 350); 
                 }
             }, 250); 
         }
 
-        document.getElementById("startBtn").onclick = () => {
+        document.getElementById("startBtn").onclick = (e) => {
+            e.stopPropagation(); // Stop drag event
             if (isRunning) return;
             isRunning = true;
             performCycle();
         };
 
-        document.getElementById("stopBtn").onclick = () => {
+        document.getElementById("stopBtn").onclick = (e) => {
+            e.stopPropagation(); // Stop drag event
             isRunning = false;
             clearInterval(alarmInterval);
             alarmInterval = null;
             statusLabel.innerText = "IDLE";
             statusLabel.style.color = "#555";
         };
+
+        targetInput.onclick = (e) => e.stopPropagation();
     }
 
     initApp();
