@@ -6,36 +6,41 @@
         let isRunning = false;
         let alarmInterval = null;
 
-        // Small, Rectangular "Slide" Panel
+        // Compact Rectangular Tile
         const panel = document.createElement("div");
         panel.id = "alien-panel";
         panel.style = `
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 25px;
+            right: 25px;
             background: #d1d1d1; 
             color: #000;
-            padding: 5px 12px;
-            border-radius: 6px;
+            padding: 10px;
+            border-radius: 8px;
             z-index: 1000000;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             font-family: sans-serif;
-            border: 1px solid #888;
+            border: 1px solid #777;
             user-select: none;
             touch-action: none;
             cursor: move;
-            height: 35px;
+            width: 140px; /* Reduced length */
         `;
         
         panel.innerHTML = `
-            <div style="font-weight: 900; font-size: 12px; letter-spacing: 1px;">ALIEN</div>
-            <input id="targetAmt" type="number" value="1000" style="width: 60px; height: 22px; padding: 0 4px; background: #fff; color: #000; border: 1px solid #777; border-radius: 3px; text-align: center; font-size: 13px; font-weight: bold; cursor: text;"/>
-            <div id="statusText" style="font-size: 10px; font-weight: bold; min-width: 70px; white-space: nowrap;">Status: <span id="statusSpan" style="color:#555;">IDLE</span></div>
-            <button id="startBtn" style="background: #2e7d32; color: #fff; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-weight: bold; font-size: 10px;">START</button>
-            <button id="stopBtn" style="background: #c62828; color: #fff; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-weight: bold; font-size: 10px;">STOP</button>
+            <div style="font-weight: 900; font-size: 13px; letter-spacing: 2px;">ALIEN</div>
+            <input id="targetAmt" type="number" value="1000" style="width: 90%; height: 26px; background: #fff; color: #000; border: 1px solid #666; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; cursor: text;"/>
+            <div id="statusText" style="font-size: 10px; font-weight: bold; text-align: center;">
+                STATUS: <span id="statusSpan" style="color:#555;">IDLE</span>
+            </div>
+            <div style="display: flex; gap: 6px; width: 100%;">
+                <button id="startBtn" style="flex: 1; background: #2e7d32; color: #fff; border: none; padding: 6px 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 10px;">START</button>
+                <button id="stopBtn" style="flex: 1; background: #c62828; color: #fff; border: none; padding: 6px 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 10px;">STOP</button>
+            </div>
         `;
         document.body.appendChild(panel);
 
@@ -98,13 +103,13 @@
             setTimeout(() => {
                 const target = targetInput.value;
                 const divs = document.querySelectorAll("div");
-                let foundMatch = false;
+                let found = false;
 
                 for (let el of divs) {
                     if (el.innerText.includes("₹") && el.innerText.includes(target)) {
                         const buyBtn = Array.from(el.querySelectorAll("button")).find(b => /buy/i.test(b.innerText));
                         if (buyBtn) {
-                            foundMatch = true;
+                            found = true;
                             buyBtn.click();
                             
                             setTimeout(() => {
@@ -113,7 +118,7 @@
                                     isRunning = false;
                                     playAlarm();
                                 } else {
-                                    statusLabel.innerText = "MISSED!";
+                                    statusLabel.innerText = "RETRYING";
                                     performCycle();
                                 }
                             }, 450);
@@ -121,8 +126,7 @@
                         }
                     }
                 }
-
-                if (isRunning && !foundMatch) setTimeout(performCycle, 350); 
+                if (isRunning && !found) setTimeout(performCycle, 350); 
             }, 250); 
         }
 
